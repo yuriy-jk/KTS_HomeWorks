@@ -5,8 +5,8 @@ from marshmallow.schema import SchemaMeta
 class MyMetaClass(SchemaMeta):
 
     def __new__(mcs, name, bases, classdict):
-        for k, v in classdict.items():
-            classdict[k] = Schema.TYPE_MAPPING[classdict[k]]()
+        for key in classdict:
+            classdict[key] = Schema.TYPE_MAPPING[classdict[key]]()
         cls = super().__new__(mcs, name, bases, classdict)
         return cls
 
