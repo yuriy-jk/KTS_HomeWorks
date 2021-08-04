@@ -2,8 +2,6 @@ from marshmallow import Schema
 from marshmallow.schema import SchemaMeta
 from typing import Any, Callable, TypeVar, Dict
 
-ClassUser = TypeVar('ClassUser')
-
 
 class MyMetaClass(SchemaMeta):
 
@@ -14,16 +12,11 @@ class MyMetaClass(SchemaMeta):
         return cls
 
 
-def my_dataclass(cls: Any) -> Callable:
-    """
-    decorator for User
-    build User.Scheme class
-    validate User's annotaions fields with marsmallow.schema fields
-    """
+def my_dataclass(cls):
 
     types = cls.__annotations__
 
-    def schema() -> ClassUser:
+    def schema() -> Schema:
         cls.Schema = MyMetaClass('User', (Schema,), types)
         return cls
 
