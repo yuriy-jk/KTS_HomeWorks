@@ -3,9 +3,6 @@ from asyncio import Queue
 
 import aiohttp
 from bs4 import BeautifulSoup
-import requests
-import pprint
-import time
 
 """берем список ссылок на последние статьи"""
 
@@ -13,7 +10,7 @@ main_link = 'https://habr.com/ru/all/page'
 links = []
 
 
-class Last_n_pages:
+class LastNPages:
 
     @staticmethod
     async def get_links(link: str):
@@ -21,7 +18,6 @@ class Last_n_pages:
             async with session.get(link) as resp:
                 if resp.status == 200:
                     text = await resp.text()
-                    #
                     soup = BeautifulSoup(text, 'lxml')
                     for link in soup.find_all(attrs={'class': 'tm-article-snippet__title-link'}):
                         links.append(link.get('href'))
@@ -33,7 +29,7 @@ class Last_n_pages:
         while queue:
             obj = await queue.get()
             # print(f'worker{n}, received, {obj}')
-            await Last_n_pages.get_links(obj)
+            await LastNPages.get_links(obj)
             # print(f'worker{n}, processed, {obj}')
             queue.task_done()
 
@@ -41,7 +37,7 @@ class Last_n_pages:
     async def main(number: int):
         queue = asyncio.Queue()
 
-        pages = [main_link + str(i) for i in range(1, number)]
+        pages = [main_link + str(i+1) for i in range(number)]
 
         for page in pages:
             await queue.put(page)
@@ -49,7 +45,7 @@ class Last_n_pages:
         tasks = []
 
         for i in range(4):
-            task = asyncio.create_task(Last_n_pages.worker(i + 1, queue))
+            task = asyncio.create_task(LastNPages.worker(i + 1, queue))
             tasks.append(task)
 
         await queue.join()
@@ -61,7 +57,7 @@ class Last_n_pages:
 
     @staticmethod
     def run(n: int):
-        asyncio.run(Last_n_pages.main(n))
+        asyncio.run(LastNPages.main(n))
         return links
 
 
