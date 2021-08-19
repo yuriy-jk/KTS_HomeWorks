@@ -1,0 +1,37 @@
+import datetime
+from typing import Dict
+
+from store.gino import db
+from sqlalchemy import DateTime
+
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self._subscriptions = {}
+
+    id = db.Column(db.Integer(), primary_key=True)
+    username = db.Column(db.String(64), nullable=False)
+    password = db.Column(db.String(32), nullable=False)
+    first_name = db.Column(db.String(64))
+    last_name = db.Column(db.String(64))
+    created = db.Column(DateTime)
+    is_banned = db.Column(db.String(8))
+
+    @property
+    def subscriptions(self):
+        return self._subscriptions
+
+    async def update_subscriptions(self, subs: Dict[str, datetime.datetime]):
+        self._subscriptions = subs
+
+
+class Subscriptions(db.Model):
+    __tablename__ = 'subscriptions'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    tag = db.Column(db.String(64))
+    schedule = db.Column(DateTime)
