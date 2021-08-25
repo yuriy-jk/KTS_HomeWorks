@@ -26,7 +26,7 @@ class ResponseBotUserSchema(BaseSchema):
 
 
 @dataclass
-class Subscriptions(BaseSchema):
+class SubscriptionsSchema(BaseSchema):
     user_id: str
     tag: str
     schedule: datetime.datetime
@@ -45,9 +45,15 @@ class GetBotUserSchema(BaseSchema):
 
 
 @dataclass
-class ListBotUserSchema(BaseSchema):
+class ListBotUserSchemaResponse(BaseSchema):
     id: int
     username: str
     first_name: str
     last_name: str
     created: datetime.datetime
+
+
+@dataclass
+class ListBotUserSchemaRequest(BaseSchema):
+    limit: int
+    q: str

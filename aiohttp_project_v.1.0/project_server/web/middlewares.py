@@ -54,3 +54,4 @@ async def auth_mw(request: web.Request, handler):
             request["session"] = session
 
     return await handler(request)
+

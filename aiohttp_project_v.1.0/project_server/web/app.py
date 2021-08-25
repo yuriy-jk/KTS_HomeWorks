@@ -1,6 +1,9 @@
 import json
+from threading import Thread
 from typing import Optional, Mapping, NoReturn
-
+import nest_asyncio
+import telebot
+from aiogram.utils import executor
 from aiohttp import web
 from aiohttp_apispec import setup_aiohttp_apispec, validation_middleware
 from marshmallow import ValidationError, Schema
@@ -11,7 +14,6 @@ from web.urls import setup_urls
 
 
 # python -m aiohttp.web -H localhost -P 8081 project_server.web.app:create_app
-from settings import config
 
 
 def my_error_handler(
@@ -56,5 +58,9 @@ def create_app():
     return app
 
 
+API_TOKEN = '1857420338:AAGJF00Eq57_4cQiFqQO55zAm_r_YFBr8EE'
+bot = telebot.TeleBot(API_TOKEN)
+
 # web.run_app(create_app(argv=1), port=config["common"]["port"])
-# web.run_app(create_app())
+if __name__ == '__main__':
+    web.run_app(create_app())

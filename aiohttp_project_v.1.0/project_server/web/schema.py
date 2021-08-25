@@ -1,4 +1,5 @@
 from typing import Type
+
 from marshmallow import Schema
 
 

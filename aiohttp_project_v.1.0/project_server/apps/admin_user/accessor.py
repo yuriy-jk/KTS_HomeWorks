@@ -5,9 +5,10 @@ from typing import Optional
 
 from apps.admin_user.models import Admin, Session
 from web.exceptions import AlreadyExists, InvalidCredentials, NotAuthorized
+from store.accessor import Accessor
 
 
-class AdminAccessor:
+class AdminAccessor(Accessor):
 
     @staticmethod
     async def add_user(username: str, password: str, first_name: str, last_name: str) -> Admin:
@@ -28,7 +29,7 @@ class AdminAccessor:
         return admin
 
 
-class SessionAccessor:
+class SessionAccessor(Accessor):
 
     @staticmethod
     async def generate_session(username: str) -> Session:
