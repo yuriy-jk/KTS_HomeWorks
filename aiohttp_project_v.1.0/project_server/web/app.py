@@ -1,12 +1,8 @@
 import json
-from threading import Thread
 from typing import Optional, Mapping, NoReturn
-import nest_asyncio
-import telebot
-from aiogram.utils import executor
 from aiohttp import web
 from aiohttp_apispec import setup_aiohttp_apispec, validation_middleware
-from marshmallow import ValidationError, Schema
+from marshmallow import ValidationError
 
 from store import Store
 from web.middlewares import resp_middleware, error_mw, auth_mw
@@ -17,11 +13,8 @@ from web.urls import setup_urls
 
 
 def my_error_handler(
-        error: ValidationError,
-        req: web.Request,
-        schema: Schema,
-        error_status_code: Optional[int] = None,
-        error_headers: Optional[Mapping[str, str]] = None,
+    error: ValidationError,
+    error_headers: Optional[Mapping[str, str]] = None,
 ) -> NoReturn:
     raise web.HTTPBadRequest(
         body=json.dumps(
@@ -52,15 +45,11 @@ def create_app():
         title="My Documentation",
         version="v1",
         swagger_path="/docs",
-        error_callback=my_error_handler
+        error_callback=my_error_handler,
     )
 
     return app
 
 
-API_TOKEN = '1857420338:AAGJF00Eq57_4cQiFqQO55zAm_r_YFBr8EE'
-bot = telebot.TeleBot(API_TOKEN)
-
-# web.run_app(create_app(argv=1), port=config["common"]["port"])
-if __name__ == '__main__':
+if __name__ == "__main__":
     web.run_app(create_app())

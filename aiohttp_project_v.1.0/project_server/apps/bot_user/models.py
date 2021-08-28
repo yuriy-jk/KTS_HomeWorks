@@ -1,7 +1,4 @@
-import datetime
-from typing import Dict
-
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, Time
 
 from store.gino import db
 
@@ -15,6 +12,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(64), nullable=False)
+    chat_id = db.Column(db.Integer())
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
     created = db.Column(DateTime)
@@ -26,9 +24,10 @@ class User(db.Model):
 
 
 class Subscriptions(db.Model):
-    __tablename__ = 'subscriptions'
+    __tablename__ = "subscriptions"
 
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     tag = db.Column(db.String(64))
-    schedule = db.Column(DateTime)
+    schedule = db.Column(Time)
+    last_update = db.Column(DateTime)

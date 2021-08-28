@@ -1,14 +1,17 @@
-"""subs_update
+"""time
 
-Revision ID: d8c2036ee771
-Revises: 034024cba87c
-Create Date: 2021-08-19 01:28:37.946852
+Revision ID: 92d347548056
+Revises: 66de04a29b40
+Create Date: 2021-08-28 22:14:42.876722
 
 """
+from alembic import op
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
-revision = "d8c2036ee771"
-down_revision = "034024cba87c"
+revision = "92d347548056"
+down_revision = "66de04a29b40"
 branch_labels = None
 depends_on = None
 

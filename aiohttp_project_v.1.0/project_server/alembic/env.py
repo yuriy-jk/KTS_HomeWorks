@@ -41,7 +41,7 @@ def run_migrations_offline():
     """
 
     app = create_app()
-    store: Store = app['store']
+    store: Store = app["store"]
     context.configure(
         url=store.pg.config.dsn,
         target_metadata=target_metadata,
@@ -62,13 +62,11 @@ def run_migrations_online():
     """
 
     app = create_app()
-    store: Store = app['store']
+    store: Store = app["store"]
     connectable = create_engine(store.pg.config.dsn)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

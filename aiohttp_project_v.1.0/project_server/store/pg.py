@@ -18,8 +18,8 @@ class PostgresConfig:
     @property
     def dsn(self):
         return (
-            f'postgres://{self.username}:{self.password}@'
-            f'{self.host}:{self.port}/{self.database}'
+            f"postgres://{self.username}:{self.password}@"
+            f"{self.host}:{self.port}/{self.database}"
         )
 
 

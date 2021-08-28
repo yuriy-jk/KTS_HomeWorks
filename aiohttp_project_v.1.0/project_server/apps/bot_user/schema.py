@@ -12,7 +12,7 @@ class RequestBotUserSchema(BaseSchema):
     password: str
     first_name: str
     last_name: str
-    subscriptions: Optional[Dict[str, datetime.datetime]]
+    subscriptions: Optional[Dict[str, datetime.time]]
 
 
 @dataclass
@@ -22,21 +22,21 @@ class ResponseBotUserSchema(BaseSchema):
     last_name: str
     created: datetime.datetime
     is_banned: str
-    subscriptions: Dict[str, datetime.datetime]
+    subscriptions: Dict[str, datetime.time]
 
 
 @dataclass
 class SubscriptionsSchema(BaseSchema):
     user_id: str
     tag: str
-    schedule: datetime.datetime
+    schedule: datetime.time
 
 
 @dataclass
 class UpdateBotUserSchema(BaseSchema):
     id: int
     is_banned: Optional[str]
-    subscriptions: Optional[Dict[str, datetime.datetime]]
+    subscriptions: Optional[Dict[str, datetime.time]]
 
 
 @dataclass

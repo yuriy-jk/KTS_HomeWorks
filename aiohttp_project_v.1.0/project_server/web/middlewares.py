@@ -11,10 +11,12 @@ async def error_mw(request, handler):
         return await handler(request)
     except Error as e:
         return web.json_response(
-            {'code': e.code, 'description': e.description}, status=e.status
+            {"code": e.code, "description": e.description}, status=e.status
         )
     except web.HTTPBadRequest as e:
-        return web.Response(status=e.status, body=e.body, content_type="application/json")
+        return web.Response(
+            status=e.status, body=e.body, content_type="application/json"
+        )
     except Exception as e:
         logging.exception(str(e))
         return web.json_response(
@@ -54,4 +56,3 @@ async def auth_mw(request: web.Request, handler):
             request["session"] = session
 
     return await handler(request)
-

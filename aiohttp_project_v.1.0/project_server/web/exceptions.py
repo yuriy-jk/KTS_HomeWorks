@@ -26,4 +26,3 @@ class NotAuthorized(Error):
     status = 401
     code = "not_authorized"
     description = "Not Authorized"
-
