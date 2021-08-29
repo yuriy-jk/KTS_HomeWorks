@@ -17,16 +17,16 @@ class SchedulerAccessor(Accessor):
 
         if sub.last_update is None:
             last_update = dt.now(tzmoscow) - datetime.timedelta(days=2)
-            await sub.update(last_update=last_update.replace(tzinfo=None))
+            await sub.update(last_update=last_update.replace(tzinfo=None)).apply()
         links = await self.store.crawler.run(sub.tag, sub.last_update)
 
         if len(links) != 0:
             date = dt.now(tzmoscow)
             db_date = date.replace(tzinfo=None)
             await sub.update(last_update=db_date).apply()
-            await self.store.telegram.send_links(chat_id, links)
+            await self.store.telegram.send_links(chat_id, sub.tag, links)
         else:
-            await self.store.telegram.send_empty_links(chat_id)
+            await self.store.telegram.send_empty_links(chat_id, sub.tag)
 
     async def check_subscribes(self):
         while True:

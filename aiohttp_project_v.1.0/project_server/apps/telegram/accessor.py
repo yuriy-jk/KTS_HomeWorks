@@ -118,10 +118,11 @@ class TelegramAccessor(Accessor):
         await message.answer("Подписки добавлены!")
 
     @dp.message_handler(content_types=["text"])
-    async def send_links(self, chat_id: int, links: list):
-        await bot.send_message(chat_id, links)
+    async def send_links(self, chat_id: int, tag: str, links: list):
+        message = f'По теме {tag}, я нашел статьи {links}'
+        await bot.send_message(chat_id, message)
 
     @dp.message_handler(content_types=["text"])
-    async def send_empty_links(self, chat_id: int):
-        text = 'Я не нашел свежих статей'
+    async def send_empty_links(self, chat_id: int, tag: str):
+        text = f'По теме {tag}, я не нашел свежих статей'
         await bot.send_message(chat_id, text)
