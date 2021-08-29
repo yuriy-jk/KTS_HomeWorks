@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aiogram.types import ContentType
 from aiohttp import web
 
@@ -10,6 +12,10 @@ from aiogram import types
 from store.bot import dp, bot
 from store.gino import db
 from web.exceptions import AlreadyExists, Error
+
+import pytz
+
+tzmoscow = pytz.timezone('Europe/Moscow')
 
 
 class TelegramAccessor(Accessor):
@@ -32,7 +38,6 @@ class TelegramAccessor(Accessor):
     @dp.message_handler(commands=["subscribe"])
     async def subscribe(message: types.Message):
         username = message.chat.username
-
         is_user = await User.query.where(User.username == username).gino.first()
         tags_list_btn = types.KeyboardButton("/Мои_подписки")
         tags_add_btn = types.KeyboardButton("/Добавить_подписки")
@@ -47,7 +52,8 @@ class TelegramAccessor(Accessor):
 
         first_name = message.chat.first_name
         last_name = message.chat.last_name
-        date = message.date
+        date = datetime.now(tzmoscow)
+        db_date = date.replace(tzinfo=None)
         chat_id = message.chat.id
         async with db.transaction():
             try:
@@ -56,7 +62,7 @@ class TelegramAccessor(Accessor):
                     username=username,
                     first_name=first_name,
                     last_name=last_name,
-                    created=date,
+                    created=db_date,
                     is_banned="False",
                 )
             except Exception:
@@ -80,8 +86,8 @@ class TelegramAccessor(Accessor):
         user = await User.query.where(User.username == username).gino.first()
         subs = (
             await Subscriptions.query.where(Subscriptions.user_id == user.id)
-            .gino.load(Subscriptions)
-            .all()
+                .gino.load(Subscriptions)
+                .all()
         )
         response = {}
         if len(subs) > 0:
@@ -114,3 +120,8 @@ class TelegramAccessor(Accessor):
     @dp.message_handler(content_types=["text"])
     async def send_links(self, chat_id: int, links: list):
         await bot.send_message(chat_id, links)
+
+    @dp.message_handler(content_types=["text"])
+    async def send_empty_links(self, chat_id: int):
+        text = 'Я не нашел свежих статей'
+        await bot.send_message(chat_id, text)

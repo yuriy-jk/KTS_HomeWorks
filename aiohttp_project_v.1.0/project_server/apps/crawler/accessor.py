@@ -1,9 +1,12 @@
 import asyncio
+import datetime
 from asyncio import Queue
 from dataclasses import dataclass
 
 import aiohttp
+import pytz
 from bs4 import BeautifulSoup
+from dateutil import parser
 from yarl import URL
 
 from store.accessor import Accessor
@@ -12,24 +15,28 @@ domen = "https://habr.com"
 tags = None
 finded_links = []
 
+tzmoscow = pytz.timezone('Europe/Moscow')
 
 @dataclass
 class Task:
     url: URL
+    last_update: datetime
 
-    def link_parser(self, data):
+    def link_parser(self, data: str):
         soup = BeautifulSoup(data, "lxml")
         res = []
-        for link in soup.find_all(attrs={"class": "tm-article-snippet__title-link"}):
-            url = URL(link.get("href"))
-            res.append(Task(url))
+        for elem in soup.find_all(attrs={'class': 'tm-article-snippet'}):
+            url = URL(elem.contents[1].contents[0].get('href'))
+            date = parser.isoparse(elem.next.contents[0].contents[1].contents[0].get('datetime'))
+            date_tz = date.astimezone(tzmoscow).replace(tzinfo=None)
+            if date_tz > self.last_update:
+                res.append(Task(url, self.last_update))
         return res
 
-    def tag_parser(self, data, url):
+    def tag_parser(self, data: str, url: URL):
         soup = BeautifulSoup(data, "lxml")
         for tag in soup.find_all(attrs={"class": "tm-article-body__tags-item"}):
             if tag.text.lower() in tags:
-                # print(url)
                 finded_links.append(url)
                 return True
 
@@ -99,7 +106,8 @@ BASE_URL = [
 
 
 class CrawlerAccessor(Accessor):
-    async def prepare(self, user_tags):
+
+    async def prepare(self, user_tags: str, last_update: datetime):
         global tags
         tags = user_tags
         global finded_links
@@ -109,11 +117,11 @@ class CrawlerAccessor(Accessor):
         pool = Pool(15, 1, queue)
         pool.start()
         for link in BASE_URL:
-            await pool.put(Task(URL(link)))
+            await pool.put(Task(URL(link), last_update))
         await queue.join()
 
-    async def run(self, user_tags):
-        await self.prepare(user_tags)
+    async def run(self, user_tags: str, last_update: datetime):
+        await self.prepare(user_tags, last_update)
         return finded_links
 
 

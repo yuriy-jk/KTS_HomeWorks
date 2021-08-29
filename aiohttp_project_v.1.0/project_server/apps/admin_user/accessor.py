@@ -2,27 +2,30 @@ import datetime
 import uuid
 from hashlib import md5
 from typing import Optional
-
 from apps.admin_user.models import Admin, Session
 from web.exceptions import AlreadyExists, InvalidCredentials, NotAuthorized
 from store.accessor import Accessor
+import pytz
+
+tzmoscow = pytz.timezone('Europe/Moscow')
 
 
 class AdminAccessor(Accessor):
     @staticmethod
     async def add_user(
-        username: str, password: str, first_name: str, last_name: str
+            username: str, password: str, first_name: str, last_name: str
     ) -> Admin:
         admin = await Admin.query.where(Admin.username == username).gino.first()
         if admin is not None:
             raise AlreadyExists
-        created = datetime.datetime.now()
+        date = datetime.datetime.now(tzmoscow)
+        db_date = date.replace(tzinfo=None)
         return await Admin.create(
             username=username,
             password=md5(password.encode()).hexdigest(),
             first_name=first_name,
             last_name=last_name,
-            created=created,
+            created=db_date,
         )
 
     @staticmethod
