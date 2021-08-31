@@ -31,8 +31,8 @@ class ListView(BaseView):
     @response_schema(ListBotUserSchemaResponse.Schema)
     @require_auth
     async def get(self):
-        params = ListBotUserSchemaRequest.Schema().dump(self.request["data"])
-        return await self.store.bot_user.list(params)
+        data = self.request["data"]
+        return await self.store.bot_user.list(data)
 
 
 class GetView(BaseView):

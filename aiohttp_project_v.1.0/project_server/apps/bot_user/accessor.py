@@ -1,5 +1,6 @@
 from typing import List
 from apps.bot_user.models import User, Subscriptions
+from apps.bot_user.schema import ListBotUserSchemaRequest
 from web.exceptions import NotFound
 from store.accessor import Accessor
 
@@ -12,20 +13,17 @@ async def user_with_subs(user: User, subs: List[Subscriptions]):
 
 class UserAccessor(Accessor):
     @staticmethod
-    async def list(params: dict) -> list:
-        limit = None
-        if "limit" in params.keys():
-            limit = params["limit"]
-        if "q" in params.keys():
+    async def list(data: ListBotUserSchemaRequest) -> list:
+        if data.q is not None:
             users = (
                 await User.query.where(
-                    User.first_name == params["q"] or User.last_name == params["q"]
+                    User.first_name == data.q or User.last_name == data.q
                 )
-                    .limit(limit)
+                    .limit(data.limit)
                     .gino.all()
             )
         else:
-            users = await User.query.limit(limit).gino.all()
+            users = await User.query.limit(data.limit).gino.all()
         return users
 
     @staticmethod

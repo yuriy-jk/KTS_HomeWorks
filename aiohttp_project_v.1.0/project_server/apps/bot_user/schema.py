@@ -55,5 +55,5 @@ class ListBotUserSchemaResponse(BaseSchema):
 
 @dataclass
 class ListBotUserSchemaRequest(BaseSchema):
-    limit: int
-    q: str
+    limit: Optional[int]
+    q: Optional[str]
