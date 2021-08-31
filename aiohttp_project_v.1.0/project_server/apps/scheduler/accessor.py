@@ -1,6 +1,8 @@
 import asyncio
 from datetime import datetime as dt
 import datetime
+from itertools import product
+
 from apps.bot_user.models import Subscriptions, User
 from store.accessor import Accessor
 
@@ -32,14 +34,13 @@ class SchedulerAccessor(Accessor):
     async def check_and_send_task(self, articles: list, now_time: tuple):
         subs = await Subscriptions.query.gino.all()
 
-        for sub in subs:
+        for sub, article in product(subs, articles):
             links = []
             await self.set_last_update(sub)
             sub_time = (sub.schedule.hour, sub.schedule.minute)
             if now_time == sub_time:
-                for article in articles:
-                    if (sub.tag in article.tags) and (sub.last_update < article.date):
-                        links.append(article.url)
+                if (sub.tag in article.tags) and (sub.last_update < article.date):
+                    links.append(article.url)
                 chat_id = await self.get_user_chat_id(sub)
                 if len(links) != 0:
                     date = dt.now(tzmoscow)
@@ -48,6 +49,23 @@ class SchedulerAccessor(Accessor):
                     await self.store.telegram.send_links(chat_id, sub.tag, links)
                 else:
                     await self.store.telegram.send_empty_links(chat_id, sub.tag)
+
+        # for sub in subs:
+        #     links = []
+        #     await self.set_last_update(sub)
+        #     sub_time = (sub.schedule.hour, sub.schedule.minute)
+        #     if now_time == sub_time:
+        #         for article in articles:
+        #             if (sub.tag in article.tags) and (sub.last_update < article.date):
+        #                 links.append(article.url)
+        #         chat_id = await self.get_user_chat_id(sub)
+        #         if len(links) != 0:
+        #             date = dt.now(tzmoscow)
+        #             db_date = date.replace(tzinfo=None)
+        #             await sub.update(last_update=db_date).apply()
+        #             await self.store.telegram.send_links(chat_id, sub.tag, links)
+        #         else:
+        #             await self.store.telegram.send_empty_links(chat_id, sub.tag)
 
     async def check_subscribes(self):
         while True:
