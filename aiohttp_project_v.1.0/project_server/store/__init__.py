@@ -6,12 +6,12 @@ class Store:
         from store.pg import PgAccessor
         from store.gino import GinoAccessor
         from store.bot import BotAccessor
-        from store.scheduler import Scheduler_Start_Accessor
+        from store.scheduler import SchedulerStartAccessor
 
         self.pg = PgAccessor(app)
         self.gino = GinoAccessor(app)
         self.bot = BotAccessor(app)
-        self.scheduler_start = Scheduler_Start_Accessor(app)
+        self.scheduler_start = SchedulerStartAccessor(app)
 
         from apps.admin_user.accessor import AdminAccessor, SessionAccessor
         from apps.bot_user.accessor import UserAccessor
