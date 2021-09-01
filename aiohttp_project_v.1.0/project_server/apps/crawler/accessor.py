@@ -2,6 +2,7 @@ import asyncio
 import datetime
 from asyncio import Queue
 from dataclasses import dataclass
+from typing import List, Optional, Union
 
 import aiohttp
 import pytz
@@ -17,10 +18,14 @@ finded_links = []
 
 tzmoscow = pytz.timezone('Europe/Moscow')
 
+articles = []
+
+
 @dataclass
 class Task:
     url: URL
-    last_update: datetime
+    date: Optional[datetime.datetime] = None
+    tags: Optional[List[str]] = None
 
     def link_parser(self, data: str):
         soup = BeautifulSoup(data, "lxml")
@@ -29,16 +34,17 @@ class Task:
             url = URL(elem.contents[1].contents[0].get('href'))
             date = parser.isoparse(elem.next.contents[0].contents[1].contents[0].get('datetime'))
             date_tz = date.astimezone(tzmoscow).replace(tzinfo=None)
-            if date_tz > self.last_update:
-                res.append(Task(url, self.last_update))
+            res.append(Task(url=url, date=date_tz))
         return res
 
-    def tag_parser(self, data: str, url: URL):
+    def tag_parser(self, data: str):
         soup = BeautifulSoup(data, "lxml")
-        for tag in soup.find_all(attrs={"class": "tm-article-body__tags-item"}):
-            if tag.text.lower() in tags:
-                finded_links.append(url)
-                return True
+        self.tags = []
+        _items = soup.find_all(attrs={"class": "tm-article-body__tags-links"})
+        _tags = _items[0].contents
+        for i in range(1, len(_tags)):
+            self.tags.append(_tags[i].text.lower())
+        return articles.append(self)
 
     async def perform(self, pool: "Pool"):
         if self.url.host is None:
@@ -55,7 +61,7 @@ class Task:
                         await pool.put(task)
                 else:
                     await asyncio.get_running_loop().run_in_executor(
-                        None, self.tag_parser, data, self.url
+                        None, self.tag_parser, data
                     )
 
 
@@ -100,32 +106,33 @@ class Pool:
 
 BASE_URL = [
     "https://habr.com/ru/all/page1",
-    "https://habr.com/ru/all/page2",
+    # "https://habr.com/ru/all/page2",
     # 'https://habr.com/ru/all/page3'
 ]
 
 
 class CrawlerAccessor(Accessor):
 
-    async def prepare(self, user_tags: str, last_update: datetime):
-        global tags
-        tags = user_tags
-        global finded_links
-        finded_links = []
+    async def prepare(self):
+        global articles
+        articles = []
 
         queue = asyncio.Queue()
         pool = Pool(15, 1, queue)
         pool.start()
         for link in BASE_URL:
-            await pool.put(Task(URL(link), last_update))
+            await pool.put(Task(URL(link)))
         await queue.join()
 
-    async def run(self, user_tags: str, last_update: datetime):
-        await self.prepare(user_tags, last_update)
-        return finded_links
+    async def run(self):
+        await self.prepare()
+        return articles
 
 
 # user_tags = ['microsoft', 'kts', 'python', 'data science', 'java', 'design']
+
 # crawler = CrawlerAccessor()
-# result = crawler.run(user_tags)
-# print(result)
+# tas = crawler.run()
+# asyncio.run(tas)
+# for article in articles:
+#     print(article)

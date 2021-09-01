@@ -9,7 +9,7 @@ async def name():
     return print(time)
 
 
-class Scheduler_Start_Accessor(Accessor):
+class SchedulerStartAccessor(Accessor):
     def __init__(self, app: web.Application):
         super().__init__(app)
         self.scheduler_task = None
