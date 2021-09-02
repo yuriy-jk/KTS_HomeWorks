@@ -7,7 +7,6 @@ from itertools import product
 from apps.bot_user.models import Subscriptions, User
 from apps.scheduler.models import Article
 from store.accessor import Accessor
-
 import pytz
 
 tzmoscow = pytz.timezone('Europe/Moscow')
@@ -21,14 +20,14 @@ BASE_URL = [
 
 class SchedulerAccessor(Accessor):
 
-    async def set_last_update(self, sub):
+    async def set_last_update(self, sub: Subscriptions):
         if sub.last_update is None:
             last_update = dt.now(tzmoscow) - datetime.timedelta(days=2)
             await sub.update(last_update=last_update.replace(tzinfo=None)).apply()
         else:
             pass
 
-    async def get_user_chat_id(self, sub):
+    async def get_user_chat_id(self, sub: Subscriptions):
         user = await User.query.where(User.id == sub.user_id).gino.first()
         chat_id = user.chat_id
         return chat_id

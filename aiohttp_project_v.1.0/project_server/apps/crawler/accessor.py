@@ -120,8 +120,6 @@ BASE_URL = [
 class CrawlerAccessor(Accessor):
 
     async def prepare(self):
-        global articles
-        articles = []
 
         queue = asyncio.Queue()
         pool = Pool(15, 1, queue)
@@ -132,7 +130,7 @@ class CrawlerAccessor(Accessor):
 
     async def run(self):
         await self.prepare()
-        return articles
+
 
 # user_tags = ['microsoft', 'kts', 'python', 'data science', 'java', 'design']
 
