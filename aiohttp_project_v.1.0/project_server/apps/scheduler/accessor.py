@@ -4,6 +4,7 @@ import datetime
 from itertools import product
 
 from apps.bot_user.models import Subscriptions, User
+from apps.scheduler.models import Article
 from store.accessor import Accessor
 
 import pytz
@@ -31,35 +32,38 @@ class SchedulerAccessor(Accessor):
         chat_id = user.chat_id
         return chat_id
 
-    async def check_and_send_task(self, articles: list):
-        while True:
-            now_time = (dt.now(tzmoscow).hour, dt.now(tzmoscow).minute)
-            subs = await Subscriptions.query.gino.all()
-
-            for sub in subs:
-                links = []
-                await self.set_last_update(sub)
-                sub_time = (sub.schedule.hour, sub.schedule.minute)
-                if now_time == sub_time:
+    async def check_and_send_task(self):
+        for i in range(60):
+            now_time = dt.now(tzmoscow)
+            time = datetime.time(now_time.hour, now_time.minute)
+            subs = await Subscriptions.query.where(Subscriptions.schedule == time).gino.all()
+            # subs = await Subscriptions.query.gino.all()
+            if len(subs) > 0:
+                for sub in subs:
+                    links = []
+                    await self.set_last_update(sub)
+                    articles = await Article.query.where(
+                        Article.tag.any(sub.tag)).where(
+                        Article.date > sub.last_update).gino.all()
                     for article in articles:
-                        if (sub.tag in article.tags) and (sub.last_update < article.date):
-                            links.append(article.url)
-                    chat_id = await self.get_user_chat_id(sub)
-                    if len(links) != 0:
                         date = dt.now(tzmoscow)
                         db_date = date.replace(tzinfo=None)
                         await sub.update(last_update=db_date).apply()
+                        links.append(article.url)
+                    chat_id = await self.get_user_chat_id(sub)
+                    if len(links) != 0:
                         await self.store.telegram.send_links(chat_id, sub.tag, links)
                     else:
                         await self.store.telegram.send_empty_links(chat_id, sub.tag)
+            await asyncio.sleep(60)
 
     async def check_subscribes(self):
         while True:
             await asyncio.sleep(0.5)
-            """запуск парсинг Хабра, получаем список статей articles с параметрами Task.url, Task.tag, Task.date"""
-            articles = await self.store.crawler.run()
+            """запуск парсинг Хабра"""
+            await self.store.crawler.run()
 
             """используем список статей для подписок юзеров"""
-            asyncio.create_task(self.check_and_send_task(articles))
+            await self.check_and_send_task()
 
-            await asyncio.sleep(60)
+
