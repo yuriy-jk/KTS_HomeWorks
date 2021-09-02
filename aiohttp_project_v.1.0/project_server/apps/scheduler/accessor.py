@@ -68,10 +68,4 @@ class SchedulerAccessor(Accessor):
             await self.check_and_send_task()
 
 
-<<<<<<< HEAD
-=======
-            await asyncio.sleep(60)
 
-
-
->>>>>>> master
