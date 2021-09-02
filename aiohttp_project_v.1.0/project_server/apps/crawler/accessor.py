@@ -11,6 +11,7 @@ from dateutil import parser
 from yarl import URL
 
 from store.accessor import Accessor
+from apps.scheduler.models import Article
 
 domen = "https://habr.com"
 tags = None
@@ -44,7 +45,7 @@ class Task:
         _tags = _items[0].contents
         for i in range(1, len(_tags)):
             self.tags.append(_tags[i].text.lower())
-        return articles.append(self)
+        return self
 
     async def perform(self, pool: "Pool"):
         if self.url.host is None:
@@ -60,9 +61,14 @@ class Task:
                     for task in res:
                         await pool.put(task)
                 else:
-                    await asyncio.get_running_loop().run_in_executor(
+                    task = await asyncio.get_running_loop().run_in_executor(
                         None, self.tag_parser, data
                     )
+                    article = await Article.query.where(Article.url == str(task.url)).gino.first()
+                    if article is None:
+                        await Article.create(url=str(task.url),
+                                             date=task.date,
+                                             tag=task.tags)
 
 
 class Pool:
@@ -127,7 +133,6 @@ class CrawlerAccessor(Accessor):
     async def run(self):
         await self.prepare()
         return articles
-
 
 # user_tags = ['microsoft', 'kts', 'python', 'data science', 'java', 'design']
 

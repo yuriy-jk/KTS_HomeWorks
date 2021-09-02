@@ -7,7 +7,7 @@ from aiohttp import web
 from store.accessor import Accessor
 
 API_TOKEN = os.environ['BOT_KEY']
-# API_TOKEN = "1857420338:AAGJF00Eq57_4cQiFqQO55zAm_r_YFBr8EE"
+
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
