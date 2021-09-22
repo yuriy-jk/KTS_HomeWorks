@@ -5,9 +5,9 @@ services:
     environment:
       POSTGRES_PASSWORD: pass
       POSTGRES_USER: user
-      POSGRES_DB: habr_db
+      POSTGRES_DB: db
     healthcheck:
-      test: POSTGRES_PASSWORD=pass pg_isready -q -U user -d habr_db
+      test: POSTGRES_PASSWORD=pass pg_isready -q -U user -d db
   api:
     build:
       context: .
