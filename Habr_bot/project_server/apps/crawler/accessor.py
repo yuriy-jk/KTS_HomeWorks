@@ -2,7 +2,7 @@ import asyncio
 import datetime
 from asyncio import Queue
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import aiohttp
 import pytz
@@ -14,12 +14,8 @@ from store.accessor import Accessor
 from apps.scheduler.models import Article
 
 domen = "https://habr.com"
-tags = None
-finded_links = []
 
 tzmoscow = pytz.timezone('Europe/Moscow')
-
-articles = []
 
 
 @dataclass
@@ -52,7 +48,6 @@ class Task:
             self.url = URL(f"{domen}{self.url}")
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url) as resp:
-                # print(self.url, resp.status)
                 data = await resp.text()
                 if "https://habr.com/ru/all/page" in str(self.url):
                     res = await asyncio.get_running_loop().run_in_executor(
@@ -131,11 +126,3 @@ class CrawlerAccessor(Accessor):
     async def run(self):
         await self.prepare()
 
-
-# user_tags = ['microsoft', 'kts', 'python', 'data science', 'java', 'design']
-
-# crawler = CrawlerAccessor()
-# tas = crawler.run()
-# asyncio.run(tas)
-# for article in articles:
-#     print(article)

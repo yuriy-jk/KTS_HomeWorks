@@ -1,8 +1,6 @@
 import asyncio
 from datetime import datetime as dt
-import time
 import datetime
-from itertools import product
 
 from apps.bot_user.models import Subscriptions, User
 from apps.scheduler.models import Article
