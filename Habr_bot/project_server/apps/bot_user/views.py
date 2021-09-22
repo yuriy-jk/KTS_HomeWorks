@@ -30,7 +30,7 @@ class ListView(BaseView):
     @request_schema(ListBotUserSchemaRequest.Schema)
     @response_schema(ListBotUserSchemaResponse.Schema)
     @require_auth
-    async def get(self):
+    async def post(self):
         data = self.request["data"]
         return await self.store.bot_user.list(data)
 
@@ -39,7 +39,7 @@ class GetView(BaseView):
     @json_schema(GetBotUserSchema.Schema)
     @response_schema(ResponseBotUserSchema.Schema)
     @require_auth
-    async def get(self):
+    async def post(self):
         data = self.request["json"]
         return await self.store.bot_user.get(data.id)
 
